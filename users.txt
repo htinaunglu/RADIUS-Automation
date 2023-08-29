@@ -1,0 +1,23 @@
+# The Followings are a lite of MOCK user DATA, 
+# you need to replace your list of users here.
+
+ID - HEAVEN0072
+User name - Michael
+
+ID - HELL0666
+User name - Lucifer
+
+ID - HEAVEN0110
+User name - Gabrial
+
+ID - HELL0111
+User name - Lilith
+
+ID - HEAVEN0216
+User name - မာတလိ
+
+ID - HEAVEN0128
+User name - ကိုမာဃ
+
+ID - HEAVEN0198
+User name - မသုနန္ဒာ
