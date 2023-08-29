@@ -5,7 +5,12 @@ Automation script to update the expiration dates for a batch of users
 Script only available for "DMA Softlab's Radius Manager 4".
 
 ### CONTENTS
-TODO
+- [[main.py]]
+- - This is the main script.
+- [[rfile.py]]
+- - Utility file for reading and sentizing the contents of the `users.txt`
+- [[users.txt]]
+- - Text file where you put your list of users.
 
 ### USAGE
 TODO
