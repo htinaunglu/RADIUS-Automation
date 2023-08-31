@@ -23,50 +23,52 @@ def parse_arguments():
 
 def admin_login(BASE_URL, user,passwd):
     hex_hmac_md5 = hmac.new(user.encode(), hashlib.md5(passwd.encode()).hexdigest().encode(), digestmod='MD5').hexdigest()
-    login_url = urljoin(BASE_URL , "/admin.php?cont=login")
+    login_url = BASE_URL + "/admin.php?cont=login"
     login_data = {"managername": user, "password": passwd, "lang": "English", "Submit": "Login", "md5": hex_hmac_md5, "url": ''}
-    try:
-        session.post(login_url, data=login_data)
-    except:
-        raise "Can't login. Please check the url path and credential."
+    resp = session.post(login_url, data=login_data)
+    if resp.status_code != 200:
+        print('URL : ' + login_url)
+        print(f'Data {login_data}')
+        raise Exception("Can't login. Please check the url path and credential.")
+    if "Redirecting" not in resp.text:
+        print(f'Data {login_data}')
+        raise Exception("Login failed. Please check credential.")
 
-
-def update_user_info(BASE_URL, username,date):
+def update_user_info(BASE_URL, username, date):
     # Get userinfo
-    getinfo_url = urljoin(BASE_URL , f"/admin.php?cont=edit_user&username={username}")
+    getinfo_url = BASE_URL + f"/admin.php?cont=edit_user&username={username}"
     resp = session.get(getinfo_url)
     soup = BeautifulSoup(resp.text,'html.parser')
-    form_soup = soup.select_one('form')
 
     # text input without disable
-    data = {e['name']: e.get('value', '') for e in form_soup.find_all('input', {'name': True, 'type':'text', 'disabled': False,})}
+    data = {e['name']: e.get('value', '') for e in soup.find_all('input', {'name': True, 'type':'text', 'disabled': False,})}
 
     # Selected option
-    for e in form_soup.find_all('option', selected=True):
+    for e in soup.find_all('option', selected=True):
         data[e.parent['name']] = e.get('value', '')
 
     # Selection with default select
-    data['lang'] = form_soup.select_one('#lang > option').get('value', '')
-    data['groupid'] = form_soup.select_one('#groupid > option').get('value', '')
-    data['owner'] = form_soup.select_one('#owner > option').get('value', '')
+    data['lang'] = soup.select_one('#lang > option').get('value', '')
+    data['groupid'] = soup.select_one('#groupid > option').get('value', '')
+    data['owner'] = soup.select_one('#owner > option').get('value', '')
 
     # textarea
-    for e in form_soup.find_all('textarea'):
+    for e in soup.find_all('textarea'):
         if e.contents:
             data[e['name']] = e.contents[0]
 
     # for checkbox
-    for e in form_soup.find_all('input', {'name': True, 'type':'checkbox' ,'disabled': False, 'checked': True}):
+    for e in soup.find_all('input', {'name': True, 'type':'checkbox' ,'disabled': False, 'checked': True}):
         data[e['name']] = e.get('value', '')
 
     # for radio
-    for e in form_soup.find_all('input', {'name': True, 'type':'radio' ,'disabled': False, 'checked': True}):
+    for e in soup.find_all('input', {'name': True, 'type':'radio' ,'disabled': False, 'checked': True}):
         data[e['name']] = e.get('value', '')
 
     # Change the expiration date
     data['expiration'] = date
 
-    update_url = urljoin(BASE_URL , f"/admin.php?cont=update_user&username={username}")
+    update_url = BASE_URL + f"/admin.php?cont=update_user&username={username}"
     resp = session.post(update_url , data=data,)
     if resp.status_code == 200:
         if 'Account updated' in resp.text:
@@ -94,6 +96,9 @@ def main():
     # expire date
     exp_date = args.date
 
+    # For Debug without threading
+    # results = [update_user_info(args.url, user, exp_date) for user in users]
+
     with tqdm(total=users_count, desc="Processing Users", unit="user") as pbar:
         with ThreadPoolExecutor(max_workers=args.thread) as ex:
             futures = [ex.submit(update_user_info, args.url, user, exp_date) for user in users]
@@ -102,6 +107,8 @@ def main():
                     result = future.result()
                     pbar.update(1)
             except KeyboardInterrupt:
+                    pbar.close()
+                    print("Cancelling the thread. Please wait...")
                     ex._threads.clear()
                     thread._threads_queues.clear()
                     ex.shutdown(wait=False, cancel_futures=True)
@@ -110,4 +117,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
