@@ -5,6 +5,10 @@ on:
     branches:
       - main
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Manual Release"]
+    types:
+      - manual
 
 jobs:
   build:
