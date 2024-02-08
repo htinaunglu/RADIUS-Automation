@@ -23,7 +23,8 @@ jobs:
 
       - name: Build
         run: |
-          cd ./with_golang/
+          pwd
+          cd with_golang
           chmod +x ./build.sh
           ./build.sh autoradius.go
 
