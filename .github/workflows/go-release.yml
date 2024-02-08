@@ -21,9 +21,7 @@ jobs:
 
       - name: Build
         run: |
-          ls -la
           cd with_golang
-          ls -la
           chmod +x ./build.sh
           ./build.sh autoradius.go
 
