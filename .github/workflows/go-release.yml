@@ -24,8 +24,8 @@ jobs:
           ls -la
           cd with_golang
           ls -la
-          chmod +x ./with_golang/build.sh
-          ./with_golang/build.sh autoradius.go
+          chmod +x ./build.sh
+          ./build.sh autoradius.go
 
   release:
     runs-on: ubuntu-latest
