@@ -14,7 +14,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
-          path: /with_golang
+          path: with_golang
 
       - name: Set up Go
         uses: actions/setup-go@v2
